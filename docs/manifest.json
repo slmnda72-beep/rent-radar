@@ -1,0 +1,9 @@
+{
+  "name": "개봉역 전월세 레이더",
+  "short_name": "개봉 전월세",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f6f4",
+  "theme_color": "#0f766e",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

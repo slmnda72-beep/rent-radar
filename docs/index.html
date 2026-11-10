@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>개봉역 전월세 레이더</title>
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="개봉 전월세">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+:root{
+  --bg:#f5f6f4;--card:#ffffff;--ink:#1c1f1e;--sub:#5f6763;--line:#e3e6e3;
+  --accent:#0f766e;--accent-soft:#e1f2ef;--good:#15803d;--bad:#b42318;--new:#c2410c;
+  --chip:#eef0ee;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121514;--card:#1b1f1e;--ink:#e9ecea;--sub:#9aa39f;--line:#2b302e;
+    --accent:#2dd4bf;--accent-soft:#163a35;--good:#4ade80;--bad:#f87171;--new:#fb923c;--chip:#242927;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121514;--card:#1b1f1e;--ink:#e9ecea;--sub:#9aa39f;--line:#2b302e;
+  --accent:#2dd4bf;--accent-soft:#163a35;--good:#4ade80;--bad:#f87171;--new:#fb923c;--chip:#242927;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;
+  -webkit-text-size-adjust:100%;}
+body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 16px 8px;border-bottom:1px solid var(--line)}
+h1{font-size:19px;margin:0;letter-spacing:-.3px}
+.upd{font-size:12px;color:var(--sub);margin-top:2px}
+.warn{margin:10px 16px 0;padding:10px 12px;border-radius:10px;background:#fff4e5;color:#7a3e00;font-size:13px;line-height:1.45}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .warn{background:#3a2a12;color:#fcd9a5}}
+main{max-width:720px;margin:0 auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:var(--chip);border-radius:10px;padding:10px}
+.stat b{display:block;font-size:17px;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--sub)}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbl{font-size:12px;color:var(--sub);margin-top:12px}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:7px 12px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .chip.on{color:#062b27}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.on{color:#062b27}}
+select,input[type=number],input[type=search]{font:inherit;font-size:15px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.item{padding:12px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .t1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.name{font-weight:600;font-size:15px}
+.price{font-weight:700;font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.meta{font-size:12.5px;color:var(--sub);margin-top:3px;line-height:1.5}
+.tag{display:inline-block;font-size:11px;padding:2px 6px;border-radius:6px;background:var(--chip);color:var(--sub);margin-right:4px}
+.tag.jeonse{background:var(--accent-soft);color:var(--accent)}
+.tag.new{background:var(--new);color:#fff}
+.cmp.good{color:var(--good)} .cmp.bad{color:var(--bad)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:6}
+nav button{flex:1;background:none;border:0;color:var(--sub);font:inherit;font-size:12px;padding:10px 0 12px;cursor:pointer}
+nav button.on{color:var(--accent);font-weight:700}
+nav button i{display:block;font-style:normal;font-size:19px;line-height:1.2}
+a.link{display:block;padding:13px 14px;margin-top:8px;border-radius:12px;background:var(--chip);color:var(--ink);text-decoration:none}
+a.link small{display:block;color:var(--sub);font-size:12px;margin-top:2px}
+.more{width:100%;margin-top:10px;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font:inherit;cursor:pointer}
+.empty{color:var(--sub);text-align:center;padding:24px 0;font-size:14px}
+.note{font-size:12.5px;color:var(--sub);line-height:1.55}
+.hide{display:none}
+.bldg{cursor:pointer}
+.sec-title{font-size:15px;font-weight:700;margin:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>개봉역 전월세 레이더</h1>
+  <div class="upd" id="upd">데이터 불러오는 중…</div>
+</header>
+<div id="warnBox"></div>
+<main>
+
+<!-- TAB: 최근 계약 -->
+<section id="tab-list">
+  <div class="card">
+    <div class="stats" id="stats"></div>
+    <div class="note" style="margin-top:8px" id="mine"></div>
+  </div>
+
+  <div class="card">
+    <input type="search" id="q" placeholder="단지·건물명 검색 (예: 현대아이파크)">
+    <div class="lbl">동네</div>
+    <div class="row" id="f-dong"></div>
+    <div class="lbl">유형</div>
+    <div class="row" id="f-use"></div>
+    <div class="lbl">거래</div>
+    <div class="row" id="f-type"></div>
+    <div class="lbl">기간</div>
+    <div class="row" id="f-period"></div>
+    <div class="grid2" style="margin-top:12px">
+      <label><div class="lbl" style="margin:0 0 4px">최대 보증금(만원)</div><input type="number" id="maxDep" inputmode="numeric" placeholder="제한 없음"></label>
+      <label><div class="lbl" style="margin:0 0 4px">최대 월세(만원)</div><input type="number" id="maxRent" inputmode="numeric" placeholder="제한 없음"></label>
+      <label><div class="lbl" style="margin:0 0 4px">최소 전용면적(㎡)</div><input type="number" id="minArea" inputmode="decimal" placeholder="예: 40"></label>
+      <label><div class="lbl" style="margin:0 0 4px">정렬</div>
+        <select id="sort">
+          <option value="date">최신 계약순</option>
+          <option value="cost">월 환산비용 낮은순</option>
+          <option value="dep">보증금 낮은순</option>
+          <option value="area">면적 넓은순</option>
+        </select></label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="chip" id="f-newonly">신규계약만</button>
+      <button class="chip" id="f-unseen">지난 방문 후 새로 뜬 것만</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="list"></div>
+    <button class="more hide" id="moreBtn">더 보기</button>
+  </div>
+</section>
+
+<!-- TAB: 단지별 시세 -->
+<section id="tab-bldg" class="hide">
+  <div class="card">
+    <p class="sec-title">단지·건물별 시세</p>
+    <p class="note" style="margin:6px 0 0">최근 계약 탭의 필터(동네·유형·기간·면적)가 그대로 적용됩니다. 건물을 누르면 그 건물 계약만 보여줘요.</p>
+  </div>
+  <div class="card"><div id="bldgList"></div></div>
+</section>
+
+<!-- TAB: 매물 보기 -->
+<section id="tab-links" class="hide">
+  <div class="card">
+    <p class="sec-title">지금 나와 있는 매물 보러가기</p>
+    <p class="note" style="margin:6px 0 0">이 앱의 숫자는 <b>실제로 체결된 계약</b>(서울시 신고 자료)이라 "이 가격이 적정한가"를 판단하는 기준이 됩니다. 지금 나와 있는 매물 자체는 아래 사이트에서 확인하세요.</p>
+    <a class="link" target="_blank" rel="noopener" href="https://m.land.naver.com/map/37.4946:126.8584:16/APT:OPST:VL/B1:B2">네이버 부동산<small>개봉역 중심 지도 · 아파트/오피스텔/빌라 · 전세/월세</small></a>
+    <a class="link" target="_blank" rel="noopener" href="https://kbland.kr/map?xy=37.4946,126.8584,16">KB부동산<small>개봉역 중심 지도</small></a>
+    <a class="link" target="_blank" rel="noopener" href="https://hogangnono.com/">호갱노노<small>앱/웹에서 "개봉역" 검색</small></a>
+    <a class="link" target="_blank" rel="noopener" href="https://www.zigbang.com/">직방<small>원룸·빌라·오피스텔 — "개봉역" 검색</small></a>
+    <a class="link" target="_blank" rel="noopener" href="https://www.dabangapp.com/">다방<small>원룸·빌라·오피스텔 — "개봉역" 검색</small></a>
+    <p class="note" style="margin-top:10px">지도 위치가 맞지 않으면 각 사이트에서 "개봉역"을 검색하세요.</p>
+  </div>
+</section>
+
+<!-- TAB: 설정 -->
+<section id="tab-set" class="hide">
+  <div class="card">
+    <p class="sec-title">지금 내 집 (비교 기준)</p>
+    <div class="grid2" style="margin-top:10px">
+      <label><div class="lbl" style="margin:0 0 4px">보증금(만원)</div><input type="number" id="myDep" inputmode="numeric"></label>
+      <label><div class="lbl" style="margin:0 0 4px">월세(만원)</div><input type="number" id="myRent" inputmode="numeric"></label>
+      <label><div class="lbl" style="margin:0 0 4px">전월세 전환율(%/년)</div><input type="number" id="rate" step="0.1" inputmode="decimal"></label>
+    </div>
+    <p class="note" style="margin-top:10px"><b>월 환산비용</b> = 월세 + 보증금 × 전환율 ÷ 12. 보증금의 기회비용(이자)까지 합친 실질 월 부담이라 전세·반전세·월세를 같은 기준으로 비교할 수 있어요. 전환율은 내가 보증금을 마련하는 비용(예: 전세대출 금리 또는 예금이자)에 맞게 바꾸세요.</p>
+    <p class="note"><b>반전세</b>: 월세 계약 중 보증금이 월세의 240배 이상인 경우로 분류했어요.</p>
+  </div>
+  <div class="card">
+    <p class="sec-title">화면</p>
+    <div class="row" id="f-theme"></div>
+  </div>
+  <div class="card">
+    <p class="sec-title">데이터 출처</p>
+    <p class="note" style="margin:6px 0 0">서울 열린데이터광장 「서울시 부동산 전월세가 정보」(tbLnOpendataRentV). 확정일자·계약신고된 전월세 계약으로, 매일 갱신됩니다. 대상: 구로구 개봉동·고척동·오류동, 최근 약 13개월. 단독·다가구는 개인정보 보호로 건물명·지번이 비어 있어요.</p>
+  </div>
+</section>
+</main>
+
+<nav>
+  <button data-tab="list" class="on"><i>📋</i>최근 계약</button>
+  <button data-tab="bldg"><i>🏢</i>단지별</button>
+  <button data-tab="links"><i>🔎</i>매물 보기</button>
+  <button data-tab="set"><i>⚙️</i>설정</button>
+</nav>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  "use strict";
+  function store(k,v){try{if(v===undefined){var s=localStorage.getItem(k);return s?JSON.parse(s):null}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+
+  // theme
+  var theme = store("theme")||"auto";
+  function applyTheme(){ if(theme==="auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",theme); }
+  applyTheme();
+
+  var D = window.RENT_DATA;
+  if(!D){ document.getElementById("upd").textContent="데이터 파일(data.js)을 찾지 못했어요. update.ps1을 먼저 실행하세요."; return; }
+
+  // ---- normalize rows ----
+  function hash(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0}return (h>>>0).toString(36)}
+  var rows = D.rows.map(function(r){
+    var o={date:r[0],dong:r[1],use:r[2],type:r[3],area:r[4]||0,dep:r[5]||0,rent:r[6]||0,floor:r[7],name:r[8],built:r[9],nu:r[10],pdep:r[11],prent:r[12],jibun:r[13],period:r[14]};
+    if(o.type==="월세" && o.rent>0 && o.dep>=o.rent*240) o.kind="반전세";
+    else o.kind=o.type;
+    o.bkey = o.name ? o.dong+"|"+o.name : o.dong+"|"+o.use+"|"+o.jibun;
+    o.id = hash(r.join("|"));
+    return o;
+  });
+
+  // ---- seen tracking (new since last visit) ----
+  var prevSeen = store("seenIds");
+  var prevSet = {}; (prevSeen||[]).forEach(function(i){prevSet[i]=1});
+  rows.forEach(function(o){ o.unseen = !!prevSeen && !prevSet[o.id]; });
+  var unseenCount = rows.filter(function(o){return o.unseen}).length;
+  store("seenIds", rows.map(function(o){return o.id}));
+
+  // ---- settings ----
+  var S = Object.assign({myDep:5000,myRent:130,rate:5.0}, store("settings")||{});
+  var F = Object.assign({dong:["개봉동"],use:["아파트","오피스텔","연립다세대"],kind:["전세","반전세","월세"],period:3,q:"",maxDep:"",maxRent:"",minArea:"",sort:"date",newOnly:false,unseen:false,bkey:null}, store("filters")||{});
+  F.bkey=null;
+
+  var DONGS=["개봉동","고척동","오류동"], USES=["아파트","오피스텔","연립다세대","단독다가구"], KINDS=["전세","반전세","월세"];
+  var PERIODS=[[1,"1개월"],[3,"3개월"],[6,"6개월"],[12,"12개월"]];
+
+  function cost(o){ return o.rent + o.dep*S.rate/100/12; }
+  function myCost(){ return S.myRent + S.myDep*S.rate/100/12; }
+  function won(m){ // 만원 -> 표기
+    m=Math.round(m);
+    if(m>=10000){ var e=Math.floor(m/10000), r=m%10000; return e+"억"+(r? " "+r.toLocaleString():""); }
+    return m.toLocaleString();
+  }
+  function priceText(o){ return o.type==="전세" ? "전세 "+won(o.dep) : won(o.dep)+" / "+o.rent; }
+  function pyeong(a){ return (a/3.3058).toFixed(1); }
+  function fmtDate(d){ return d.slice(0,4)+"."+d.slice(4,6)+"."+d.slice(6,8); }
+  function median(a){ if(!a.length) return null; a=a.slice().sort(function(x,y){return x-y}); var m=a.length>>1; return a.length%2?a[m]:(a[m-1]+a[m])/2; }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]}); }
+
+  // ---- header ----
+  var newestContract = rows.reduce(function(m,o){return o.date>m?o.date:m},"00000000");
+  document.getElementById("upd").textContent = "갱신 "+D.updated+" · 최근 계약일 "+(rows.length?fmtDate(newestContract):"-")+" · 총 "+rows.length.toLocaleString()+"건" + (unseenCount&&prevSeen? " · 새로 "+unseenCount+"건":"");
+  if(D.sample){
+    document.getElementById("warnBox").innerHTML='<div class="warn">⚠️ 지금은 <b>샘플 키</b>로 받은 일부 데이터(동별 5건)만 보여요. 서울 열린데이터광장에서 무료 인증키를 받아 넣으면 전체 계약(개봉동만 연 3천 건 이상)이 들어옵니다.</div>';
+  }
+
+  // ---- chips ----
+  function chips(id, opts, getOn, toggle){
+    var el=document.getElementById(id); el.innerHTML="";
+    opts.forEach(function(op){
+      var v=Array.isArray(op)?op[0]:op, t=Array.isArray(op)?op[1]:op;
+      var b=document.createElement("button"); b.className="chip"+(getOn(v)?" on":""); b.textContent=t;
+      b.onclick=function(){ toggle(v); save(); renderAll(); };
+      el.appendChild(b);
+    });
+  }
+  function multi(key){ return [function(v){return F[key].indexOf(v)>=0}, function(v){var i=F[key].indexOf(v); if(i>=0) F[key].splice(i,1); else F[key].push(v);}]; }
+  function save(){ store("filters",F); store("settings",S); }
+
+  // ---- filtering ----
+  function cutoffDate(months){ var d=new Date(); d.setMonth(d.getMonth()-months); return d.toISOString().slice(0,10).replace(/-/g,""); }
+  function baseFilter(o){
+    if(F.dong.indexOf(o.dong)<0) return false;
+    if(F.use.indexOf(o.use)<0) return false;
+    if(o.date<cutoffDate(F.period)) return false;
+    if(F.minArea!=="" && o.area<+F.minArea) return false;
+    return true;
+  }
+  function fullFilter(o){
+    if(!baseFilter(o)) return false;
+    if(F.kind.indexOf(o.kind)<0) return false;
+    if(F.maxDep!=="" && o.dep>+F.maxDep) return false;
+    if(F.maxRent!=="" && o.rent>+F.maxRent) return false;
+    if(F.newOnly && o.nu!=="신규") return false;
+    if(F.unseen && !o.unseen) return false;
+    if(F.q && (o.name||"").indexOf(F.q)<0) return false;
+    if(F.bkey && o.bkey!==F.bkey) return false;
+    return true;
+  }
+
+  var shown=40;
+  function renderList(){
+    var list=rows.filter(fullFilter);
+    var sorters={date:function(a,b){return b.date.localeCompare(a.date)},cost:function(a,b){return cost(a)-cost(b)},dep:function(a,b){return a.dep-b.dep},area:function(a,b){return b.area-a.area}};
+    list.sort(sorters[F.sort]);
+
+    // stats
+    var js=list.filter(function(o){return o.type==="전세"}), ws=list.filter(function(o){return o.type==="월세"});
+    var mc=median(list.map(cost));
+    document.getElementById("stats").innerHTML =
+      '<div class="stat"><span>조건에 맞는 계약</span><b>'+list.length.toLocaleString()+'건</b></div>'+
+      '<div class="stat"><span>월 환산비용 중간값</span><b>'+(mc==null?"-":Math.round(mc)+"만")+'</b></div>'+
+      '<div class="stat"><span>전세 보증금 중간값</span><b>'+(js.length?won(median(js.map(function(o){return o.dep}))):"-")+'</b></div>'+
+      '<div class="stat"><span>월세 중간값 (보증금/월)</span><b>'+(ws.length?won(median(ws.map(function(o){return o.dep})))+" / "+Math.round(median(ws.map(function(o){return o.rent}))):"-")+'</b></div>';
+    var cheaper=list.filter(function(o){return cost(o)<myCost()}).length;
+    document.getElementById("mine").innerHTML = "지금 집(보증금 "+won(S.myDep)+" / 월 "+S.myRent+")의 월 환산비용은 <b>"+Math.round(myCost())+"만원</b>이에요. 위 계약 중 <b>"+cheaper+"건</b>이 더 저렴해요."+
+      (F.bkey? ' <a href="#" id="clrB">건물 필터 해제 ✕</a>':"");
+    var clr=document.getElementById("clrB"); if(clr) clr.onclick=function(e){e.preventDefault();F.bkey=null;renderAll();};
+
+    var el=document.getElementById("list");
+    if(!list.length){ el.innerHTML='<div class="empty">조건에 맞는 계약이 없어요. 필터를 넓혀 보세요.</div>'; document.getElementById("moreBtn").classList.add("hide"); return; }
+    var mine=myCost();
+    el.innerHTML=list.slice(0,shown).map(function(o){
+      var c=cost(o), diff=Math.round(c-mine);
+      var nm=o.name||(o.use+(o.jibun&&o.jibun!=="0"?" "+o.jibun:""));
+      var renew = o.nu==="갱신" && o.pdep!=null ? " · 갱신(종전 "+(o.prent? won(o.pdep)+"/"+o.prent : "전세 "+won(o.pdep))+")" : (o.nu? " · "+o.nu:"");
+      return '<div class="item"><div class="t1"><div class="name">'+(o.unseen?'<span class="tag new">NEW</span>':'')+esc(nm)+'</div><div class="price">'+priceText(o)+'</div></div>'+
+        '<div class="meta"><span class="tag'+(o.type==="전세"?" jeonse":"")+'">'+o.kind+'</span><span class="tag">'+esc(o.use)+'</span>'+
+        esc(o.dong)+' · 전용 '+o.area+'㎡('+pyeong(o.area)+'평) · '+(o.floor>0?o.floor+'층':'층 비공개')+(o.built?' · '+o.built+'년식':'')+'</div>'+
+        '<div class="meta">계약 '+fmtDate(o.date)+esc(renew)+' · 월환산 '+Math.round(c)+'만 <span class="cmp '+(diff<=0?"good":"bad")+'">('+(diff<=0?"":"+")+diff+')</span></div></div>';
+    }).join("");
+    document.getElementById("moreBtn").classList.toggle("hide", list.length<=shown);
+  }
+
+  function renderBldg(){
+    var groups={};
+    rows.filter(function(o){return baseFilter(o)&&F.kind.indexOf(o.kind)>=0}).forEach(function(o){ (groups[o.bkey]=groups[o.bkey]||[]).push(o); });
+    var arr=Object.keys(groups).map(function(k){
+      var g=groups[k], o=g[0];
+      var js=g.filter(function(x){return x.type==="전세"}), ws=g.filter(function(x){return x.type==="월세"});
+      var areas=g.map(function(x){return x.area});
+      return {k:k,o:o,n:g.length,
+        jd:js.length?median(js.map(function(x){return x.dep})):null,
+        wd:ws.length?median(ws.map(function(x){return x.dep})):null,
+        wr:ws.length?median(ws.map(function(x){return x.rent})):null,
+        mc:median(g.map(cost)),amin:Math.min.apply(null,areas),amax:Math.max.apply(null,areas),last:g.reduce(function(m,x){return x.date>m?x.date:m},"0")};
+    }).sort(function(a,b){return b.n-a.n});
+    var el=document.getElementById("bldgList");
+    if(!arr.length){ el.innerHTML='<div class="empty">해당 조건의 건물이 없어요.</div>'; return; }
+    el.innerHTML=arr.slice(0,150).map(function(b){
+      var o=b.o, nm=o.name||(o.use+" "+(o.jibun&&o.jibun!=="0"?o.jibun:"(비공개)"));
+      var q=encodeURIComponent(o.dong+" "+(o.name||""));
+      return '<div class="item bldg" data-k="'+esc(b.k)+'"><div class="t1"><div class="name">'+esc(nm)+'</div><div class="price">'+b.n+'건</div></div>'+
+        '<div class="meta"><span class="tag">'+esc(o.use)+'</span>'+esc(o.dong)+(o.built?' · '+o.built+'년식':'')+' · 전용 '+b.amin+(b.amax!==b.amin?'~'+b.amax:'')+'㎡ · 최근 '+fmtDate(b.last)+'</div>'+
+        '<div class="meta">전세 중간 '+(b.jd!=null?won(b.jd):'-')+' · 월세 중간 '+(b.wd!=null?won(b.wd)+'/'+Math.round(b.wr):'-')+' · 월환산 '+Math.round(b.mc)+'만'+
+        (o.name?' · <a target="_blank" rel="noopener" href="https://m.search.naver.com/search.naver?query='+q+'">네이버 검색</a>':'')+'</div></div>';
+    }).join("");
+    Array.prototype.forEach.call(el.querySelectorAll(".bldg"),function(d){
+      d.onclick=function(e){ if(e.target.tagName==="A") return; F.bkey=d.getAttribute("data-k"); shown=40; go("list"); renderAll(); window.scrollTo(0,0); };
+    });
+  }
+
+  function renderFilters(){
+    var m;
+    m=multi("dong"); chips("f-dong",DONGS,m[0],m[1]);
+    m=multi("use"); chips("f-use",USES.map(function(u){return [u,u==="연립다세대"?"빌라(연립·다세대)":u==="단독다가구"?"단독·다가구":u]}),m[0],m[1]);
+    m=multi("kind"); chips("f-type",KINDS,m[0],m[1]);
+    chips("f-period",PERIODS,function(v){return F.period===v},function(v){F.period=v});
+    chips("f-theme",[["auto","시스템"],["light","밝게"],["dark","어둡게"]],function(v){return theme===v},function(v){theme=v;store("theme",v);applyTheme()});
+    document.getElementById("f-newonly").className="chip"+(F.newOnly?" on":"");
+    document.getElementById("f-unseen").className="chip"+(F.unseen?" on":"");
+  }
+  function renderAll(){ renderFilters(); renderList(); renderBldg(); }
+
+  // inputs
+  function bindInput(id,obj,key,num){
+    var el=document.getElementById(id); el.value=obj[key];
+    el.addEventListener("input",function(){ obj[key]= num? (el.value===""?0:+el.value) : el.value; shown=40; save(); renderList(); renderBldg(); });
+  }
+  bindInput("q",F,"q"); bindInput("maxDep",F,"maxDep"); bindInput("maxRent",F,"maxRent"); bindInput("minArea",F,"minArea"); bindInput("sort",F,"sort");
+  bindInput("myDep",S,"myDep",true); bindInput("myRent",S,"myRent",true); bindInput("rate",S,"rate",true);
+  document.getElementById("f-newonly").onclick=function(){F.newOnly=!F.newOnly;save();renderAll()};
+  document.getElementById("f-unseen").onclick=function(){F.unseen=!F.unseen;save();renderAll()};
+  document.getElementById("moreBtn").onclick=function(){shown+=40;renderList()};
+
+  // tabs
+  function go(t){
+    ["list","bldg","links","set"].forEach(function(x){ document.getElementById("tab-"+x).classList.toggle("hide",x!==t); });
+    Array.prototype.forEach.call(document.querySelectorAll("nav button"),function(b){ b.classList.toggle("on",b.getAttribute("data-tab")===t); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("nav button"),function(b){ b.onclick=function(){ go(b.getAttribute("data-tab")); window.scrollTo(0,0); }; });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
