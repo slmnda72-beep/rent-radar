@@ -80,3 +80,72 @@ $outDir = Join-Path $root 'docs'
 if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir | Out-Null }
 [IO.File]::WriteAllText((Join-Path $outDir 'data.js'), $js, (New-Object Text.UTF8Encoding $false))
 Write-Host "Saved $($rows.Count) contracts -> docs/data.js ($stamp)"
+
+# ---------------------------------------------------------------------------
+# Part 2: LH public rental notices (data.go.kr, B552555/lhLeaseNoticeInfo1)
+# Key: env DATA_GO_KR_KEY, or first line of datagokr.txt. Failure here never breaks Part 1.
+# ---------------------------------------------------------------------------
+function Find-Prop($obj, [string]$name) {
+    if ($null -eq $obj) { return $null }
+    if ($obj -is [System.Array]) {
+        foreach ($x in $obj) { $f = Find-Prop $x $name; if ($null -ne $f) { return $f } }
+        return $null
+    }
+    if ($obj -is [System.Management.Automation.PSCustomObject]) {
+        foreach ($p in $obj.PSObject.Properties) {
+            if ($p.Name -eq $name) { return , $p.Value }
+            $f = Find-Prop $p.Value $name; if ($null -ne $f) { return $f }
+        }
+    }
+    return $null
+}
+function Pick($o, [string[]]$names) {
+    foreach ($n in $names) { $p = $o.PSObject.Properties[$n]; if ($p -and "$($p.Value)".Trim() -ne '') { return "$($p.Value)".Trim() } }
+    return ''
+}
+
+$nKey = $env:DATA_GO_KR_KEY
+$nKeyFile = Join-Path $root 'datagokr.txt'
+if (-not $nKey -and (Test-Path $nKeyFile)) { $nKey = (Get-Content $nKeyFile -TotalCount 1).Trim() }
+$noticeItems = New-Object System.Collections.Generic.List[string]
+$noticeStatus = 'nokey'
+if ($nKey) {
+    try {
+        $encKey = if ($nKey -match '%') { $nKey } else { [uri]::EscapeDataString($nKey) }
+        $from = $today.AddDays(-120).ToString('yyyy.MM.dd')
+        $to = $today.AddDays(365).ToString('yyyy.MM.dd')
+        $nSeen = @{}
+        foreach ($cnp in @('11', '41')) {        # 11 Seoul, 41 Gyeonggi (Gwangmyeong/Bucheon border Gaebong)
+            for ($page = 1; $page -le 10; $page++) {
+                $url = "https://apis.data.go.kr/B552555/lhLeaseNoticeInfo1/lhLeaseNoticeInfo1?serviceKey=$encKey&PG_SZ=100&PAGE=$page&CNP_CD=$cnp&PAN_NT_ST_DT=$from&CLSG_DT=$to"
+                $res = Invoke-RestMethod -Uri $url -TimeoutSec 60
+                if ($res -is [string]) { throw "LH API: $($res.Substring(0, [Math]::Min(200, $res.Length)))" }
+                $errMsg = Find-Prop $res 'returnAuthMsg'
+                if ($errMsg) { throw "LH API: $errMsg" }
+                $list = @(Find-Prop $res 'dsList')
+                if ($list.Count -eq 0 -or $null -eq $list[0]) { break }
+                foreach ($it in $list) {
+                    $nm = Pick $it @('PAN_NM')
+                    $u = Pick $it @('DTL_URL')
+                    $id = "$nm|$u"
+                    if (-not $nm -or $nSeen.ContainsKey($id)) { continue }
+                    $nSeen[$id] = 1
+                    # [title, type, subtype, region, status, postDate, closeDate, url]
+                    $noticeItems.Add(('["{0}","{1}","{2}","{3}","{4}","{5}","{6}","{7}"]' -f (Esc $nm),
+                        (Esc (Pick $it @('UPP_AIS_TP_NM'))), (Esc (Pick $it @('AIS_TP_CD_NM'))), (Esc (Pick $it @('CNP_CD_NM'))),
+                        (Esc (Pick $it @('PAN_SS'))), (Esc (Pick $it @('PAN_NT_ST_DT', 'PAN_DT'))), (Esc (Pick $it @('CLSG_DT'))), (Esc $u)))
+                }
+                $all = [int]("0" + (Pick $list[0] @('ALL_CNT')))
+                if ($page * 100 -ge $all) { break }
+            }
+        }
+        $noticeStatus = 'ok'
+        Write-Host "LH notices: $($noticeItems.Count)"
+    } catch {
+        $noticeStatus = 'error'
+        Write-Warning "LH notices failed: $($_.Exception.Message)"
+        $noticeErr = $_.Exception.Message
+    }
+}
+$nJs = "window.NOTICE_DATA={`"updated`":`"$stamp`",`"status`":`"$noticeStatus`",`"error`":`"$(Esc $noticeErr)`",`"items`":[" + ($noticeItems -join ",`n") + "]};"
+[IO.File]::WriteAllText((Join-Path $outDir 'notices.js'), $nJs, (New-Object Text.UTF8Encoding $false))
