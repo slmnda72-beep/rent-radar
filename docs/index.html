@@ -374,7 +374,7 @@ a.link small{display:block;color:var(--sub);font-size:12px;margin-top:2px}
     o.star=STAR.test(o.title); o.near=NEAR.test(o.title+" "+o.region);
     o.closed=/마감|발표|완료/.test(o.status);
     return o;
-  }).filter(function(o){ return !/토지|상가|분양주택/.test(o.type); });
+  }).filter(function(o){ return /임대주택|주거복지/.test(o.type) || (/임대|행복/.test(o.sub) && !/상가/.test(o.sub)); });
   store("seenNotices", notices.map(function(o){return o.id}));
   function normDate(s){ return (s||"").replace(/[^0-9]/g,"").slice(0,8); }
   function dday(s){
